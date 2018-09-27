@@ -177,6 +177,30 @@ describe("Cypher", () => {
 			expect(paramValues).toContain(expectedParams.release);
 		});
 
+		it("should work with params that are arrays", () => {
+			const expectedParams = {
+				title: "Marvel: Infinity War",
+				release: new Date().toString()
+			};
+			const expectedString = /^MATCH \(m:Movie:NewRelease \{title: \{(.*?)\}, release: \{(.*?)\}\}\) RETURN m$/;
+
+			const [
+				actualString,
+				actualParams
+			] = cql`MATCH (m:Movie:NewRelease {${cql.fromProps(
+				["title", "release", "empty"],
+				expectedParams
+			)}}) RETURN m`.export();
+
+			const paramValues = Object.values(actualParams);
+			expect(actualString).toMatch(expectedString);
+			const matches = expectedString.exec(actualString);
+			expect(actualParams[matches[1]]).toEqual(expectedParams.title);
+			expect(actualParams[matches[2]]).toEqual(expectedParams.release);
+			expect(paramValues).toContain(expectedParams.title);
+			expect(paramValues).toContain(expectedParams.release);
+		});
+
 		it("should throw if given something other than alphanumerics and underscores", () => {
 			const maybeDangerousLabel = "ValidLabel) DELETE (b) SELECT (c:";
 			expect(

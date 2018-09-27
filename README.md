@@ -10,8 +10,8 @@ your queries through the default driver without the added pain.
 
 ## Why?
 
-I found the default driver's parameterization to be a little akward this is where template strings come in handy;
-and, I found the driver hard to use when trying to insert objects from JavaScript, so the `cql.fromProps()` method
+I found the default driver's parameterization to be a little akward this is where template strings come in handy.
+I also found the driver hard to use when trying to insert objects from JavaScript, so the `cql.fromProps()` method
 was something designed to help alleviate that pain. Other query builders seemed to take away from the simpleness of the
 cypher query language by almost completely abstracting it away into methods. One goal of this project is to keep things
 as close to looking like the cypher query language as possible.
@@ -178,7 +178,7 @@ const anna = {
 	name: "anna",
 	other: "H4x0r User input"
 };
-const whitelistedProps = ["email", "name"];
+const whitelistedProps = ["email", "name", "nonExistentProp"];
 const selectPerson = cql`MATCH (anna:Person {${cql.fromProps(
 	whitelistedProps,
 	anna

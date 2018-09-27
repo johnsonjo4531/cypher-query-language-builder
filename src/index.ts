@@ -7,7 +7,7 @@ export interface IHelperConfig {
 }
 
 interface FromProps {
-	(propsWhitelist: [string], object: object): CypherQuery;
+	(propsWhitelist: [string], object: object): any;
 }
 
 interface Raw {
@@ -65,23 +65,27 @@ export default class CypherHelper {
 			 * 	{title: "Bee Movie", release: new Date().toString()}
 			 * )}}) RETURN m`
 			 */
-			fromProps: function(
-				propsWhitelist: [string],
-				object: object
-			): CypherQuery {
-				return this`${propsWhitelist
+			fromProps: function(propsWhitelist: [string], object: object): any {
+				const keyVals = propsWhitelist
 					.map((prop: string, i: number, arr: [string]) => {
-						if (i === arr.length - 1) {
-							return [this.raw`${prop}: `, object[prop]];
+						if (
+							object[prop] === undefined ||
+							object[prop] === null
+						) {
+							return undefined;
 						} else {
-							return [
-								this.raw`${prop}: `,
-								object[prop],
-								this.raw`, `
-							];
+							return [this.raw`${prop}: `, object[prop]];
 						}
 					})
-					.reduce((a, b) => a.concat(b), [])}`;
+					.filter(x => !!x)
+					.reduce((a, b, i, arr) => {
+						if (i === arr.length - 1) {
+							return a.concat([...b]);
+						} else {
+							return a.concat([...b, this.raw`, `]);
+						}
+					}, []);
+				return this`${keyVals}`;
 			}
 		}
 	);

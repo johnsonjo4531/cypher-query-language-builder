@@ -5,7 +5,7 @@ export interface IHelperConfig {
     rawResults?: boolean;
 }
 interface FromProps {
-    (propsWhitelist: [string], object: object): CypherQuery;
+    (propsWhitelist: [string], object: object): any;
 }
 interface Raw {
     (strings: TemplateStringsArray, ...params: any[]): CypherRawText;
