@@ -1,6 +1,6 @@
 {
 	"name": "cypher-query-language-builder",
-	"version": "2.1.2",
+	"version": "2.1.3",
 	"description": "A tiny helper for writing and running Cypher queries using Javascript tagged templates",
 	"main": "./lib/index.js",
 	"types": "./lib/index.d.ts",

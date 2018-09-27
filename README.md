@@ -6,11 +6,12 @@ Fork of [cypher-tagged-templates](https://www.npmjs.com/package/cypher-tagged-te
 
 A tiny helper for securely writing and running Cypher queries using Javascript tagged templates. This query builder
 is designed to help be as close to cypher as possible while providing convenience methods that help you write
-your queries without the added pain.
+your queries through the default driver without the added pain.
 
 ## Why?
 
-I found the default driver to be hard to use when trying to insert objects from JavaScript the `cql.fromProps()` method
+I found the default driver's parameterization to be a little akward this is where template strings come in handy;
+and, I found the driver hard to use when trying to insert objects from JavaScript, so the `cql.fromProps()` method
 was something designed to help alleviate that pain. Other query builders seemed to take away from the simpleness of the
 cypher query language by almost completely abstracting it away into methods. One goal of this project is to keep things
 as close to looking like the cypher query language as possible.
