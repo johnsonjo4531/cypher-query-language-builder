@@ -1,6 +1,27 @@
 # cypher-query-language-builder
 
-A tiny helper for securely writing and running Cypher queries using Javascript tagged templates.
+Fork of [cypher-tagged-templates](https://www.npmjs.com/package/cypher-tagged-templates)
+
+## What?
+
+A tiny helper for securely writing and running Cypher queries using Javascript tagged templates. This query builder
+is designed to help be as close to cypher as possible while providing convenience methods that help you write
+your queries without the added pain.
+
+## Why?
+
+I found the default driver to be hard to use when trying to insert objects from JavaScript the `cql.fromProps()` method
+was something designed to help alleviate that pain. Other query builders seemed to take away from the simpleness of the
+cypher query language by almost completely abstracting it away into methods. One goal of this project is to keep things
+as close to looking like the cypher query language as possible.
+
+## How?
+
+### Installation
+
+```bash
+npm install --save cypher-query-language-builder
+```
 
 ### Basic example
 
@@ -87,7 +108,9 @@ const result = mainQuery.run().then(result => {
 
 ### Raw text input
 
-You can add raw text input into your query using `` cql.raw`text with ${input}` `` as long as your `input` is formatted as alphanumerics and/or underscores. Because you can only put in this limited set of characthers with raw input your code is safe from injection attacks.
+You can add raw text input into your query using `` cql.raw`text with ${input}` ``. Note that text that is not interpolated will be inserted
+raw into your query without parameterization, but interpolated values are formatted as alphanumerics and/or underscores. Because you can only
+put in this limited set of characthers with interpolated input your code is safe from injection attacks.
 
 ```javascript
 // ...setup
@@ -108,7 +131,7 @@ const selectPerson = mainQuery.run().then(result => {
 
 ### Array input
 
-You can arrays of any valid interpolation value and they will be concatenated together.
+You can add arrays of any valid interpolation value and they will be concatenated together in your query.
 
 ```javascript
 // ...setup
