@@ -1,4 +1,4 @@
-# cypher-tagged-templates
+# cypher-query-language-builder
 
 A tiny helper for securely writing and running Cypher queries using Javascript tagged templates.
 
@@ -10,7 +10,7 @@ The return value of the query is an array of records, after calling the `toObjec
 
 ```javascript
 const neo4j = require("neo4j-driver").v1;
-const Cypher = require("cypher-tagged-templates").default;
+const Cypher = require("cypher-query-language-builder").default;
 
 const driver = neo4j.driver("bolt://...", neo4j.auth.basic("neo4j", "pass"));
 const cql = new Cypher({ driver }).query;

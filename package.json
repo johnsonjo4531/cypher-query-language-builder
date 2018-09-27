@@ -1,6 +1,6 @@
 {
-	"name": "cypher-tagged-templates",
-	"version": "2.0.4",
+	"name": "cypher-query-language-builder",
+	"version": "2.1.0",
 	"description": "A tiny helper for writing and running Cypher queries using Javascript tagged templates",
 	"main": "./lib/index.js",
 	"types": "./lib/index.d.ts",
@@ -16,14 +16,17 @@
 		"cypher",
 		"cql"
 	],
-	"author": "Ionut Botizan <ionut.botizan@gmail.com>",
+	"authors": [
+		"Ionut Botizan <ionut.botizan@gmail.com>",
+		"John Johnson II <johnsonjo4531@gmail.com>"
+	],
 	"license": "MIT",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/ionut-botizan/cypher-tagged-templates"
+		"url": "https://github.com/johnsonjo4531/cypher-tagged-templates"
 	},
 	"bugs": {
-		"url": "https://github.com/ionut-botizan/cypher-tagged-templates/issues"
+		"url": "https://github.com/johnsonjo4531/cypher-query-language-builder/issues"
 	},
 	"dependencies": {
 		"neo4j-driver": "^1.6.1"
