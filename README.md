@@ -43,7 +43,7 @@ const query = cql`
 `;
 
 const result = query.run().then(result => {
-	console.log(result[0].user);
+    console.log(result[0].user);
 });
 
 // at some point
@@ -60,8 +60,8 @@ You can configure the helper to automatically convert Neo4j integers to native J
 const driver = neo4j.driver("bolt://...", neo4j.auth.basic("neo4j", "pass"));
 
 const cql = new Cypher({
-	driver,
-	parseIntegers: true
+    driver,
+    parseIntegers: true
 }).query;
 
 // ...
@@ -103,30 +103,7 @@ const mainQuery = cql`
 `;
 
 const result = mainQuery.run().then(result => {
-	console.log(result.records);
-});
-```
-
-### Raw text input
-
-You can add raw text input into your query using `` cql.raw`text with ${input}` ``. Note that text that is not interpolated will be inserted
-raw into your query without parameterization, but interpolated values are formatted as alphanumerics and/or underscores. Because you can only
-put in this limited set of characthers with interpolated input your code is safe from injection attacks.
-
-```javascript
-// ...setup
-
-const anna = {
-	email: "anna@example.com"
-};
-const prop = "email";
-const selectPerson = cql`MATCH (anna:Person {${cql.raw`${prop}`}: ${
-	anna[prop]
-}})
-RETURN anna`;
-
-const selectPerson = mainQuery.run().then(result => {
-	console.log(result.records);
+    console.log(result.records);
 });
 ```
 
@@ -138,15 +115,14 @@ You can add arrays of any valid interpolation value and they will be concatenate
 // ...setup
 
 const anna = {
-	email: "anna@example.com",
-	name: "anna"
+    email: "anna@example.com",
+    name: "anna"
 };
-const prop = "email";
 const selectPerson = cql`MATCH (anna:Person {${[
-	cql.raw`${prop}: `,
-	anna[prop],
-	cql`, name: `,
-	anna.name
+    cql.raw`email: `,
+    anna[prop],
+    cql`, name: `,
+    anna.name
 ]}}) 
 RETURN anna`;
 /**
@@ -162,7 +138,7 @@ RETURN anna`;
  */
 
 const result = mainQuery.run().then(result => {
-	console.log(result.records);
+    console.log(result.records);
 });
 ```
 
@@ -174,14 +150,14 @@ You can insert whitelisted properties and values from an object using the `cql.f
 // ...setup
 
 const anna = {
-	email: "anna@example.com",
-	name: "anna",
-	other: "H4x0r User input"
+    email: "anna@example.com",
+    name: "anna",
+    other: "H4x0r User input"
 };
 const whitelistedProps = ["email", "name", "nonExistentProp"];
 const selectPerson = cql`MATCH (anna:Person {${cql.fromProps(
-	whitelistedProps,
-	anna
+    anna,
+    whitelistedProps
 )}}) 
 RETURN anna`;
 /**
@@ -197,7 +173,7 @@ RETURN anna`;
  */
 
 const result = mainQuery.run().then(result => {
-	console.log(result.records);
+    console.log(result.records);
 });
 ```
 
@@ -239,8 +215,8 @@ const query = cql`
 `;
 
 interface IUser {
-	name: string;
-	status: "active" | "disabled";
+    name: string;
+    status: "active" | "disabled";
 }
 
 const result = await query.run<{ user: IUser }>({ parseIntegers: true });
@@ -252,31 +228,31 @@ const result = await query.run<{ user: IUser }>({ parseIntegers: true });
 
 ```typescript
 interface IHelperConfig {
-	driver?: neo4j.Driver;
-	parseIntegers?: boolean;
+    driver?: neo4j.Driver;
+    parseIntegers?: boolean;
 }
 
 interface FromProps {
-	(propsWhitelist: [string], object: object): CypherQuery;
+    (propsWhitelist: [string], object: object): CypherQuery;
 }
 
 interface Raw {
-	(strings: TemplateStringsArray, ...params: any[]): CypherRawText;
+    (strings: TemplateStringsArray, ...params: any[]): CypherRawText;
 }
 
 interface Query {
-	(strings: TemplateStringsArray, ...params: any[]): CypherQuery;
-	raw: Raw;
-	fromProps: FromProps;
+    (strings: TemplateStringsArray, ...params: any[]): CypherQuery;
+    raw: Raw;
+    fromProps: FromProps;
 }
 
 class CypherHelper {
-	constructor(config: IHelperConfig = {});
-	query = Query;
+    constructor(config: IHelperConfig = {});
+    query = Query;
 }
 
 class CypherQuery {
-	export(prefix: string = "p"): [string, any];
-	async run<T extends Object>(config: IHelperConfig = {}): Promise<T[]>;
+    export(prefix: string = "p"): [string, any];
+    async run<T extends Object>(config: IHelperConfig = {}): Promise<T[]>;
 }
 ```

@@ -1,20 +1,17 @@
 {
-	"compilerOptions": {
-		"experimentalDecorators": true,
-		"outDir": "./lib/",
-		"sourceMap": true,
-		"declaration": true,
-		"noImplicitAny": false,
-		"module": "commonjs",
-		"moduleResolution": "node",
-		"esModuleInterop": true,
-		"allowSyntheticDefaultImports": true,
-		"target": "es2015"
-	},
-	"include": [
-		"./src/**/*"
-	],
-	"exclude": [
-		"node_modules"
-	]
+    "compilerOptions": {
+        "experimentalDecorators": true,
+        "outDir": "./lib/",
+        "sourceMap": true,
+        "declaration": true,
+        "noImplicitAny": false,
+        "module": "commonjs",
+        "moduleResolution": "node",
+        "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true,
+        "target": "es2017"
+    },
+    "include": ["./src/index.ts"],
+    "exclude": ["node_modules"],
+    "globals": ["describe", "it", "jest"]
 }

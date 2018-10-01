@@ -12,7 +12,7 @@ insert_final_newline = true
 # Set default charset
 [*.{js,html,css,json,md,vue,scss,ejs,ts}]
 charset = utf-8
-indent_style = tab
+indent_style = space
 indent_size = 4
 
 [makefile]
