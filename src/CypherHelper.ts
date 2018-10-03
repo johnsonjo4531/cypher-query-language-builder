@@ -24,6 +24,12 @@ interface INodeConfig {
     propsWhitelist?: string[];
 }
 
+interface ISetterConfig {
+    name: string;
+    properties: object;
+    propsWhitelist: string[];
+}
+
 type IRawTextLike = string | CypherRawText;
 
 interface IQuery {
@@ -36,6 +42,7 @@ interface IQuery {
     labels: (...labels: string[]) => CypherRawText;
     Node: (config?: INodeConfig) => CypherQuery;
     Relationship: (config?: IRelationshipConfig) => CypherQuery;
+    setters: (config: ISetterConfig) => CypherQuery;
 }
 
 function raw(
@@ -81,6 +88,16 @@ function raw(
     );
 }
 
+function join(array, joiner) {
+    return array.reduce((a, b, i, arr) => {
+        if (i === arr.length - 1) {
+            return a.concat(b);
+        } else {
+            return a.concat(b, [joiner]);
+        }
+    }, []);
+}
+
 function InnerNode(
     cql: IQuery,
     { name, labels, properties, propsWhitelist }: INodeConfig = {}
@@ -88,11 +105,18 @@ function InnerNode(
     const space = name || labels ? raw` ` : raw``;
     const rawName = name ? raw`${name}` : raw``;
     const rawLabels = labels ? raw`${cql.labels(...labels)}` : raw``;
-    properties = properties
-        ? cql`${space}{${cql.fromProps(propsWhitelist, properties)}}`
-        : raw``;
+    properties =
+        properties && propsWhitelist.length > 0
+            ? cql`${space}{${cql.fromProps(propsWhitelist, properties)}}`
+            : raw``;
     return cql`${rawName}${rawLabels}${properties}`;
 }
+
+const isValidPropsWhitelist = (props: object, whitelist: string[]) =>
+    props &&
+    whitelist &&
+    Array.isArray(whitelist) &&
+    whitelist.every(x => typeof x === "string");
 
 export default class CypherHelper {
     public query: IQuery = Object.assign(
@@ -100,6 +124,9 @@ export default class CypherHelper {
             return new CypherQuery(this.config, strings, params);
         },
         {
+            config(config: IHelperConfig = {}): void {
+                this.config = { ...this.config, ...config };
+            },
             dirLeft: RelationDir.Left,
             dirNone: RelationDir.None,
             dirRight: RelationDir.Right,
@@ -122,12 +149,7 @@ export default class CypherHelper {
                 propsWhitelist: string[],
                 properties: object
             ): CypherQuery {
-                if (
-                    properties &&
-                    (!propsWhitelist ||
-                        !Array.isArray(propsWhitelist) ||
-                        !propsWhitelist.every(x => typeof x === "string"))
-                ) {
+                if (!isValidPropsWhitelist(properties, propsWhitelist)) {
                     throw new TypeError(
                         "propsWhiteList key must be defined as an array of strings for safety reasons when properties are defined"
                     );
@@ -143,15 +165,9 @@ export default class CypherHelper {
                             return [raw`${prop}: `, properties[prop]];
                         }
                     })
-                    .filter(x => !!x)
-                    .reduce((a, b, i, arr) => {
-                        if (i === arr.length - 1) {
-                            return a.concat([...b]);
-                        } else {
-                            return a.concat([...b, raw`, `]);
-                        }
-                    }, []);
-                return this`${keyVals}`;
+                    .filter(x => !!x);
+
+                return this`${join(keyVals, raw`, `)}`;
             },
             labels(...labels: string[]): CypherRawText {
                 const rawLabels = labels.map(label => raw`:${label}`);
@@ -175,8 +191,35 @@ export default class CypherHelper {
                     return this`${left}--${right}`;
                 }
             },
-            config(config: IHelperConfig = {}): void {
-                this.config = { ...this.config, ...config };
+            setters({
+                name,
+                properties,
+                propsWhitelist
+            }: ISetterConfig): CypherQuery {
+                if (!properties || !propsWhitelist) {
+                    throw new TypeError(
+                        "'properties' and 'propsWhitelist' keys must be defined"
+                    );
+                }
+                if (
+                    properties &&
+                    !isValidPropsWhitelist(properties, propsWhitelist)
+                ) {
+                    throw new TypeError(
+                        "propsWhitelist key must be defined as an array of allowed keys as strings for safety reasons when properties are defined"
+                    );
+                }
+                if (!name) {
+                    throw new TypeError(
+                        "'name' must be defined in config object"
+                    );
+                }
+                const rawName = raw`${name}`;
+                const mapping = propsWhitelist.map(prop => {
+                    const rawProp = raw`.${prop}`;
+                    return this`${rawName}${rawProp} = ${properties[prop]}`;
+                });
+                return this`${join(mapping, raw`, `)}`;
             }
         }
     );

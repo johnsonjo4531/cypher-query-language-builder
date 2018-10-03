@@ -2,6 +2,36 @@
 
 Fork of [cypher-tagged-templates](https://www.npmjs.com/package/cypher-tagged-templates)
 
+-   NPM: https://www.npmjs.com/package/cypher-query-language-builder
+-   Github: https://github.com/johnsonjo4531/cypher-query-language-builder#readme
+
+[Version Change Differences](./VERSION_CHANGES.md)
+
+Table of Contents:
+
+<!-- TOC -->
+
+-   [cypher-query-language-builder](#cypher-query-language-builder)
+    -   [What?](#what)
+    -   [Why?](#why)
+    -   [How?](#how)
+        -   [Installation](#installation)
+        -   [Basic example](#basic-example)
+        -   [Node insertion](#node-insertion)
+        -   [Setting](#setting)
+        -   [Relationships](#relationships)
+        -   [Enable automatic integers parsing](#enable-automatic-integers-parsing)
+        -   [Override configuration options when running a query](#override-configuration-options-when-running-a-query)
+        -   [Nested queries](#nested-queries)
+        -   [Array input](#array-input)
+        -   [Insert Whitelisted Object](#insert-whitelisted-object)
+        -   [Manual queries](#manual-queries)
+        -   [Using with Typescript](#using-with-typescript)
+    -   [API](#api)
+    -   [More Examples](#more-examples)
+
+<!-- /TOC -->
+
 ## What?
 
 A tiny helper for securely writing and running Cypher queries using Javascript tagged templates. This query builder
@@ -48,6 +78,180 @@ const result = query.run().then(result => {
 
 // at some point
 // driver.close()
+```
+
+### Node insertion
+
+You can create a node with a given variable `name`, some given `labels`, and a given `properties` object that is whitelisted through `propsWhitelist`.
+
+```javascript
+// cql setup
+
+const annaNode = cql.Node({
+    labels: ["Person", "User"],
+    name: "anna",
+    properties: {
+        email: "anna@example.com",
+        name: "anna",
+        notAdded: "random"
+    },
+    propsWhitelist: ["email", "name", "address"]
+});
+
+const bananaNode = cql.Node({
+    labels: ["Person", "User", "Admin"],
+    name: "annabananna",
+    properties: {
+        email: "annabananna@example.com",
+        name: "anna bananna",
+        notAdded: "random",
+        address: "123 Whitaker Ln."
+    },
+    propsWhitelist: ["email", "name", "address"]
+});
+
+const query = cql`CREATE ${annaNode} CREATE ${bananaNode} RETURN anna, annabananna`;
+
+query
+    .run()
+    .then(function(a) {
+        console.log(JSON.stringify(a, null, 2));
+        /* outputs:
+        * [
+        *  {
+        *   "anna": {
+        *      "name": "anna",
+        *      "email": "anna@example.com"
+        *    },
+        *    "annabananna": {
+        *      "name": "anna bananna",
+        *      "email": "annabananna@example.com",
+        *      "address": "123 Whitaker Ln."
+        *    }
+        *  }
+        * ]
+        */
+    })
+    .then(function() {
+        driver.close();
+    });
+```
+
+### Setting
+
+Setting is how you update certain properties in Neo4j. In order to quickly write a setter from an object and whitelist you can use
+the `cql.setters()` method. In the below we Match any existing node's with Anna's email or create it if it's not there by using a MERGE clause and set that node with her name and address using a SET clause with `.setters()`.
+
+```javascript
+// cql setup
+
+const anna = {
+    email: "anna@example.com",
+    name: "anna",
+    address: "123 Washington Blvd."
+};
+
+const annaNode = cql.Node({
+    labels: ["User"],
+    name: "anna",
+    properties: anna,
+    propsWhitelist: ["email"]
+});
+
+const annaSetters = cql.setters({
+    name: "anna",
+    properties: anna,
+    propsWhitelist: ["name", "address"]
+});
+
+const query = cql`MERGE ${annaNode} SET ${annaSetters}  RETURN anna`;
+
+query
+    .run()
+    .then(function(a) {
+        console.log(JSON.stringify(a, null, 2));
+        /* outputs:
+        * [
+        *  {
+        *   "anna": {
+        *      "name": "anna",
+        *      "email": "anna@example.com"
+        *      "address": "123 Washington Blvd."
+        *    },
+        *  }
+        * ]
+        */
+    })
+    .then(function() {
+        driver.close();
+    });
+```
+
+### Relationships
+
+You can create a relationship with a given variable `name`, some given `labels`, and a given `properties` object that is whitelisted through `propsWhitelist`.
+
+```javascript
+// cql setup
+
+const annaNode = cql.Node({
+    labels: ["Person", "User"],
+    name: "anna",
+    properties: {
+        email: "anna@example.com",
+        name: "anna",
+        notAdded: "random"
+    },
+    propsWhitelist: ["email", "name", "address"]
+});
+
+const friend = cql.Relationship({
+    name: "fr",
+    labels: ["FRIEND"],
+    properties: {
+        since: Date.now()
+    },
+    propsWhitelist: ["since"],
+    direction: cql.dirRight
+});
+
+const bananaNode = cql.Node({
+    labels: ["Person", "User", "Admin"],
+    name: "annabananna",
+    properties: {
+        email: "annabananna@example.com",
+        name: "anna bananna",
+        notAdded: "random",
+        address: "123 Whitaker Ln."
+    },
+    propsWhitelist: ["email", "name", "address"]
+});
+
+const query = cql`CREATE ${annaNode} CREATE ${bananaNode} CREATE (anna) ${friend} (annabananna) RETURN anna, annabananna, fr`;
+
+query
+    .run()
+    .then(function(a) {
+        console.log(JSON.stringify(a, null, 2));
+        /* outputs:
+        * [
+        *  {
+        *   "anna": {
+        *      "name": "anna",
+        *      "email": "anna@example.com"
+        *    },
+        *    "annabananna": {
+        *      "name": "anna bananna",
+        *      "email": "annabananna@example.com",
+        *      "address": "123 Whitaker Ln."
+        *    }
+        *  }
+        * ]
+        */
+    })
+    .then(function() {
+        driver.close();
+    });
 ```
 
 ### Enable automatic integers parsing
@@ -226,33 +430,110 @@ const result = await query.run<{ user: IUser }>({ parseIntegers: true });
 
 ## API
 
+index.d.ts
+
 ```typescript
-interface IHelperConfig {
-    driver?: neo4j.Driver;
-    parseIntegers?: boolean;
-}
+import CypherHelper from "./CypherHelper";
+import CypherQuery from "./CypherQuery";
+import { DangerousTextError } from "./Errors";
+export default CypherHelper;
+export { CypherQuery, DangerousTextError };
+```
 
-interface FromProps {
-    (propsWhitelist: [string], object: object): CypherQuery;
-}
+CypherHelper.d.ts
 
-interface Raw {
-    (strings: TemplateStringsArray, ...params: any[]): CypherRawText;
+```typescript
+import CypherQuery from "./CypherQuery";
+import CypherRawText from "./CypherRawText";
+import { IHelperConfig } from "./Interfaces";
+declare enum RelationDir {
+    Left = 0,
+    Right = 1,
+    None = 2
 }
-
-interface Query {
+interface IRelationshipConfig {
+    name?: string;
+    labels?: string[];
+    direction?: RelationDir;
+    properties?: object;
+    propsWhitelist?: string[];
+}
+interface INodeConfig {
+    name?: string;
+    labels?: string[];
+    properties?: object;
+    propsWhitelist?: string[];
+}
+interface ISetterConfig {
+    name: string;
+    properties: object;
+    propsWhitelist: string[];
+}
+interface IQuery {
     (strings: TemplateStringsArray, ...params: any[]): CypherQuery;
-    raw: Raw;
-    fromProps: FromProps;
+    config: (config: IHelperConfig) => void;
+    dirLeft: RelationDir;
+    dirRight: RelationDir;
+    dirNone: RelationDir;
+    fromProps: (propsWhitelist: string[], object: object) => CypherQuery;
+    labels: (...labels: string[]) => CypherRawText;
+    Node: (config?: INodeConfig) => CypherQuery;
+    Relationship: (config?: IRelationshipConfig) => CypherQuery;
+    setters: (config: ISetterConfig) => CypherQuery;
 }
-
-class CypherHelper {
-    constructor(config: IHelperConfig = {});
-    query = Query;
+export default class CypherHelper {
+    query: IQuery;
+    private config;
+    constructor(config?: IHelperConfig);
 }
+export {};
+```
 
-class CypherQuery {
-    export(prefix: string = "p"): [string, any];
-    async run<T extends Object>(config: IHelperConfig = {}): Promise<T[]>;
+CypherQuery.d.ts
+
+```typescript
+import { IHelperConfig } from "./Interfaces";
+export default class CypherQuery {
+    protected config: IHelperConfig;
+    protected strings: TemplateStringsArray;
+    protected params: any[];
+    constructor(
+        config: IHelperConfig,
+        strings: TemplateStringsArray,
+        params?: any[]
+    );
+    export(prefix?: string): [string, any];
+    run<T extends object = any>(config?: IHelperConfig): Promise<any>;
 }
 ```
+
+CypherRawText.d.ts
+
+```typescript
+export default class CypherRawText {
+    private text;
+    constructor(text: string);
+    toString(): string;
+}
+```
+
+Errors.d.ts
+
+```typescript
+export declare class DangerousTextError extends TypeError {}
+```
+
+Interfaces.d.ts
+
+```typescript
+import neo4j from "neo4j-driver";
+export interface IHelperConfig {
+    driver?: neo4j.Driver;
+    parseIntegers?: boolean;
+    rawResults?: boolean;
+}
+```
+
+## More Examples
+
+See the tests in `./src/__tests__` for more examples

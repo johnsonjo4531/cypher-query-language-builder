@@ -257,6 +257,73 @@ describe("Cypher", () => {
         });
     });
 
+    describe("query.setters", () => {
+        it("should create empty setter clause", () => {
+            const expectedString = /^$/;
+            const expectedParams = {};
+
+            const [actualString, actualParams] = cql
+                .setters({
+                    name: "a",
+                    properties: {
+                        name: "doesn't matter no whitelist"
+                    },
+                    propsWhitelist: []
+                })
+                .export();
+
+            expect(actualString).toMatch(expectedString);
+            expect(actualParams).toMatchObject(expectedParams);
+        });
+
+        it("should be able to run full api and set values", () => {
+            const input = {
+                name: "a",
+                properties: {
+                    address: "123 Whitaker Ln.",
+                    email: "annabananna@example.com",
+                    name: "anna"
+                },
+                propsWhitelist: ["name", "email"]
+            };
+            const expectedString = /^a.name = \{(.*?)\}, a.email = \{(.*?)\}$/;
+            const expectedParams = {
+                name: "anna"
+            };
+
+            const [actualString, actualParams] = cql.setters(input).export();
+
+            expect(actualString).toMatch(expectedString);
+            const matches = expectedString.exec(actualString);
+            expect(actualParams[matches[1]]).toEqual(expectedParams.name);
+            const paramValues = Object.values(actualParams);
+            expect(paramValues).toContain(expectedParams.name);
+            expect(paramValues).toContain(input.properties.email);
+            expect(paramValues).not.toContain(input.properties.address);
+        });
+
+        it("should throw if given something other than alphanumerics and underscores", () => {
+            const maybeDangerousLabel = "ValidLabel) DELETE (b) MATCH (c:";
+            expect(() => {
+                cql.setters({
+                    name: "a",
+                    properties: {
+                        'a: "foo" }) DELETE (b) MATCH (b {foo:': "random"
+                    },
+                    propsWhitelist: ['a: "foo" }) DELETE (b) MATCH (b {foo:']
+                });
+            }).toThrowError(DangerousTextError);
+        });
+
+        it("should throw if given properties but no whitelist", () => {
+            expect(() =>
+                cql.Node({
+                    properties: { foo: "bar" }
+                })
+            ).toThrowError(TypeError);
+        });
+    });
+
     describe("query.Relationship", () => {
         it("should create empty relationship", () => {
             const expectedString = /^--$/;
@@ -447,7 +514,7 @@ describe("Cypher", () => {
     });
 
     describe("query.fromProps", () => {
-        it("should work with params that are arrays", () => {
+        it("should transform object and whitelist into Neo4j props", () => {
             const expectedParams = {
                 release: new Date().toString(),
                 title: "Marvel: Infinity War"
@@ -459,30 +526,6 @@ describe("Cypher", () => {
                 actualParams
             ] = cql`MATCH (m:Movie:NewRelease {${cql.fromProps(
                 ["title", "release"],
-                expectedParams
-            )}}) RETURN m`.export();
-
-            const paramValues = Object.values(actualParams);
-            expect(actualString).toMatch(expectedString);
-            const matches = expectedString.exec(actualString);
-            expect(actualParams[matches[1]]).toEqual(expectedParams.title);
-            expect(actualParams[matches[2]]).toEqual(expectedParams.release);
-            expect(paramValues).toContain(expectedParams.title);
-            expect(paramValues).toContain(expectedParams.release);
-        });
-
-        it("should work with params that are arrays", () => {
-            const expectedParams = {
-                release: new Date().toString(),
-                title: "Marvel: Infinity War"
-            };
-            const expectedString = /^MATCH \(m:Movie:NewRelease \{title: \{(.*?)\}, release: \{(.*?)\}\}\) RETURN m$/;
-
-            const [
-                actualString,
-                actualParams
-            ] = cql`MATCH (m:Movie:NewRelease {${cql.fromProps(
-                ["title", "release", "empty"],
                 expectedParams
             )}}) RETURN m`.export();
 

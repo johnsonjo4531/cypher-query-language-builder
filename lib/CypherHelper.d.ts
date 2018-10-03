@@ -19,6 +19,11 @@ interface INodeConfig {
     properties?: object;
     propsWhitelist?: string[];
 }
+interface ISetterConfig {
+    name: string;
+    properties: object;
+    propsWhitelist: string[];
+}
 interface IQuery {
     (strings: TemplateStringsArray, ...params: any[]): CypherQuery;
     config: (config: IHelperConfig) => void;
@@ -29,6 +34,7 @@ interface IQuery {
     labels: (...labels: string[]) => CypherRawText;
     Node: (config?: INodeConfig) => CypherQuery;
     Relationship: (config?: IRelationshipConfig) => CypherQuery;
+    setters: (config: ISetterConfig) => CypherQuery;
 }
 export default class CypherHelper {
     query: IQuery;

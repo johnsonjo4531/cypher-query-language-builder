@@ -2,7 +2,7 @@
 
 ## v3.0.0
 
-`cql.raw` was removed, because it was dangerous to use outside of parenthesis or square brackets. Added `cql.Node` and `cql.Relationship` along with enumerative direction types `cql.dirLeft`, `cql.dirRight`, `cql.dirNone`. Updated `cql.fromProps` to only work if there is a props whitelist.
+`cql.raw` was removed, because it was dangerous to use outside of parenthesis or square brackets. Added `cql.setters`, `cql.Node` and `cql.Relationship` along with enumerative direction types `cql.dirLeft`, `cql.dirRight`, `cql.dirNone`. Updated `cql.fromProps` to only work if there is a props whitelist.
 
 ## v2.1.4
 
