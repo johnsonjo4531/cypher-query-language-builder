@@ -1,5 +1,9 @@
 # Version Changes
 
+## v3.0.1
+
+Updated README with correct output for `Relationship`
+
 ## v3.0.0
 
 `cql.raw` was removed, because it was dangerous to use outside of parenthesis or square brackets. Added `cql.setters`, `cql.Node` and `cql.Relationship` along with enumerative direction types `cql.dirLeft`, `cql.dirRight`, `cql.dirNone`. Updated `cql.fromProps` to only work if there is a props whitelist.

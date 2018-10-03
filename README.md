@@ -234,20 +234,37 @@ query
     .then(function(a) {
         console.log(JSON.stringify(a, null, 2));
         /* outputs:
-        * [
-        *  {
-        *   "anna": {
-        *      "name": "anna",
-        *      "email": "anna@example.com"
-        *    },
-        *    "annabananna": {
-        *      "name": "anna bananna",
-        *      "email": "annabananna@example.com",
-        *      "address": "123 Whitaker Ln."
-        *    }
-        *  }
-        * ]
-        */
+        [
+            {
+                "anna": {
+                "name": "anna",
+                "email": "anna@example.com"
+                },
+                "annabananna": {
+                "name": "anna bananna",
+                "email": "annabananna@example.com",
+                "address": "123 Whitaker Ln."
+                },
+                "fr": {
+                "identity": {
+                    "low": 0,
+                    "high": 0
+                },
+                "start": {
+                    "low": 15,
+                    "high": 0
+                },
+                "end": {
+                    "low": 16,
+                    "high": 0
+                },
+                "type": "FRIEND",
+                "properties": {
+                    "since": 1538582191625
+                }
+                }
+            }
+        ]*/
     })
     .then(function() {
         driver.close();
